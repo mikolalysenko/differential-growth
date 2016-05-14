@@ -6,10 +6,10 @@ const refineMesh = require('refine-mesh')
 const getBounds = require('bound-points')
 const allPairs = require('n-body-pairs')(3, 1024)
 
-const ITERS = 10
+const ITERS = 20
 const REPEL_RADIUS = 1.0
 const EDGE_LENGTH = REPEL_RADIUS
-const GROWTH_RATE = 0.01
+const GROWTH_RATE = 0.005
 const REPEL_STRENGTH = 0.005
 
 function sendMesh (mesh) {
@@ -70,7 +70,7 @@ function update (mesh) {
   }
 
   // refine
-  return refineMesh(mesh.cells, mesh.positions, normals, {
+  return refineMesh(mesh.cells, mesh.positions, calcNormals(mesh.cells, mesh.positions), {
     edgeLength: EDGE_LENGTH
   })
 }
