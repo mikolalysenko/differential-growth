@@ -9,9 +9,13 @@ const positionBuffer = regl.buffer({usage: 'dynamic'})
 const normalBuffer = regl.buffer({usage: 'dynamic'})
 const cellBuffer = regl.elements({usage: 'dynamic'})
 
+let targetRadius = 100.0
+let radius = 100.0
+
 meshWorker.addEventListener('message', ({data: {
-  positions, normals, cells
+  radius, positions, normals, cells
 }}) => {
+  targetRadius = radius * 2 + 10
   positionBuffer({data: positions, usage: 'dynamic'})
   normalBuffer({data: normals, usage: 'dynamic'})
   cellBuffer({data: cells, usage: 'dynamic'})
@@ -54,7 +58,7 @@ const drawMesh = regl({
 
     view: (props, {t}) =>
       lookAt([],
-        [20.0 * Math.cos(t), 0, 20.0 * Math.sin(t)],
+        [radius * Math.cos(t), 0, radius * Math.sin(t)],
         [0, 0, 0],
         [0, 1, 0])
   },
@@ -69,6 +73,8 @@ regl.frame(() => {
     color: [0, 0, 0, 1],
     depth: 1
   })
+
+  radius = 0.8 * radius + 0.2 * targetRadius
 
   drawMesh()
 })
