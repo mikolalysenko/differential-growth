@@ -3,16 +3,23 @@ const seed = require('conway-hart')('I')
 const calcNormals = require('angle-normals')
 const calcCurvature = require('mesh-mean-curvature')
 const refineMesh = require('refine-mesh')
+const getBounds = require('bound-points')
 const allPairs = require('n-body-pairs')(3, 1024)
 
 const ITERS = 10
 const REPEL_RADIUS = 1.0
-const EDGE_LENGTH = REPEL_RADIUS / 2.5
-const GROWTH_RATE = 0.001
-const REPEL_STRENGTH = 0.001
+const EDGE_LENGTH = REPEL_RADIUS
+const GROWTH_RATE = 0.01
+const REPEL_STRENGTH = 0.005
 
 function sendMesh (mesh) {
+  const bounds = getBounds(mesh.positions)
   self.postMessage({
+    radius: Math.max(
+      Math.abs(bounds[0][0]),
+      Math.abs(bounds[0][2]),
+      Math.abs(bounds[1][0]),
+      Math.abs(bounds[1][2])),
     positions: mesh.positions,
     normals: calcNormals(mesh.cells, mesh.positions),
     cells: mesh.cells
@@ -54,7 +61,7 @@ function update (mesh) {
       const p = mesh.positions[i]
       const H = meanCurvature[i]
       const N = normals[i]
-      const W = GROWTH_RATE * H * Math.random()
+      const W = GROWTH_RATE * H * Math.random() * Math.random()
       for (let d = 0; d < 3; ++d) {
         p[d] += REPEL_STRENGTH * forces[3 * i + d] + W * N[d]
         forces[3 * i + d] = 0
@@ -70,8 +77,10 @@ function update (mesh) {
 
 module.exports = () => {
   let mesh = seed
-  setInterval(() => {
+  function step () {
     sendMesh(mesh)
     mesh = update(mesh)
-  }, 100)
+    setTimeout(step, 100)
+  }
+  step()
 }
