@@ -80,7 +80,7 @@ module.exports = () => {
   function step () {
     sendMesh(mesh)
     mesh = update(mesh)
-    setTimeout(step, 100)
+    setTimeout(step, 500)
   }
   step()
 }
